@@ -236,9 +236,8 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     const commPct = vals.comm / 100;
     const purchaseComm = pp * commPct;
     const holdCost = pp * (rate * months / 12);
-    const closingCost = pp * market.closingCostPct;
     const sellingCost = arv * 0.05;
-    const totalCost = reno + holdCost + closingCost + sellingCost + purchaseComm;
+    const totalCost = reno + holdCost + sellingCost + purchaseComm;
     const netProfit = arv - pp - totalCost;
     const roi = pp + reno > 0 ? netProfit / (pp + reno) * 100 : 0;
     const loanAmt = pp * (1 - dp);
@@ -254,8 +253,8 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     const capRate = pp > 0 ? annualNOI / pp * 100 : 0;
     const grossYield = pp > 0 ? annualRent / pp * 100 : 0;
     const refiAmt = arv * market.refiLTV;
-    const cashIn = pp + reno + purchaseComm;
-    const cashLeft = cashIn - refiAmt;
+    const cashIn = pp * dp + reno + purchaseComm;
+    const cashLeft = cashIn - (refiAmt - loanAmt);
     const refiMortgage = calcMortgage(refiAmt, rate);
     const brrrCashflow = rent - (refiMortgage + monthlyTax + monthlyIns + monthlyMaint + monthlyVacancy);
     const score = (() => {
@@ -267,7 +266,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
       if (prop.leadScore >= 11 && prop.leadGrade === "A") s += 3; else if (prop.leadScore >= 9 || prop.leadGrade === "A") s += 2; else if (prop.leadScore >= 7 || prop.leadGrade === "B") s += 1;
       return s;
     })();
-    return { pp, reno, arv, rent, netProfit, roi, holdCost, closingCost, sellingCost, purchaseComm, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
+    return { pp, reno, arv, rent, netProfit, roi, holdCost, sellingCost, purchaseComm, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
   };
 
   const [calc, setCalc] = useState(() => runCalc(defaults));
@@ -339,7 +338,6 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
             React.createElement(Row, { label: "Purchase", value: fmt(calc.pp) }),
             React.createElement(Row, { label: "+ Reno", value: fmt(calc.reno) }),
             React.createElement(Row, { label: "+ Hold", value: fmt(calc.holdCost) }),
-            React.createElement(Row, { label: "+ Closing", value: fmt(calc.closingCost) }),
             React.createElement(Row, { label: "+ Purch Comm", value: fmt(calc.purchaseComm) }),
             React.createElement(Row, { label: "+ Selling (5%)", value: fmt(calc.sellingCost) }),
             React.createElement(Row, { label: "ARV", value: fmt(calc.arv) }),
