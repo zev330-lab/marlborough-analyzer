@@ -32,20 +32,20 @@ const gradeColor = (g) => g === "A" ? "bg-emerald-100 text-emerald-800" : g === 
 const stratColor = (s) => s === "Flip" ? "bg-emerald-600" : s === "Hold" ? "bg-blue-600" : s === "BRRRR" ? "bg-purple-600" : s === "Value-Add" ? "bg-amber-600" : "bg-slate-400";
 // ── SVG Icons ──────────────────────────────────────────────
 const LogoSVG = () => React.createElement("svg",{viewBox:"0 0 80 80",width:80,height:80,className:"mx-auto"},
-  React.createElement("rect",{x:10,y:35,width:60,height:40,rx:4,fill:"#1B4332",stroke:"#95D5B2",strokeWidth:2}),
-  React.createElement("polygon",{points:"40,8 5,38 75,38",fill:"#1B4332",stroke:"#95D5B2",strokeWidth:2}),
-  React.createElement("rect",{x:30,y:50,width:20,height:25,rx:2,fill:"#95D5B2",opacity:.8}),
-  React.createElement("circle",{cx:58,cy:22,r:14,fill:"none",stroke:"#95D5B2",strokeWidth:3}),
-  React.createElement("line",{x1:68,y1:32,x2:78,y2:42,stroke:"#95D5B2",strokeWidth:3,strokeLinecap:"round"}),
-  React.createElement("rect",{x:18,y:45,width:8,height:8,rx:1,fill:"#95D5B2",opacity:.5}),
-  React.createElement("rect",{x:54,y:45,width:8,height:8,rx:1,fill:"#95D5B2",opacity:.5}),
+  React.createElement("rect",{x:10,y:35,width:60,height:40,rx:4,fill:"#2D6A4F",stroke:"#D4A843",strokeWidth:2}),
+  React.createElement("polygon",{points:"40,8 5,38 75,38",fill:"#2D6A4F",stroke:"#D4A843",strokeWidth:2}),
+  React.createElement("rect",{x:30,y:50,width:20,height:25,rx:2,fill:"#D4A843",opacity:.8}),
+  React.createElement("circle",{cx:58,cy:22,r:14,fill:"none",stroke:"#D4A843",strokeWidth:3}),
+  React.createElement("line",{x1:68,y1:32,x2:78,y2:42,stroke:"#D4A843",strokeWidth:3,strokeLinecap:"round"}),
+  React.createElement("rect",{x:18,y:45,width:8,height:8,rx:1,fill:"#D4A843",opacity:.5}),
+  React.createElement("rect",{x:54,y:45,width:8,height:8,rx:1,fill:"#D4A843",opacity:.5}),
 );
 
 const PhoneRotateIcon = () => React.createElement("svg",{viewBox:"0 0 64 64",width:64,height:64,style:{animation:"rotatePhone 2s ease-in-out infinite"}},
-  React.createElement("rect",{x:18,y:8,width:28,height:48,rx:4,fill:"none",stroke:"#95D5B2",strokeWidth:2.5}),
-  React.createElement("circle",{cx:32,cy:50,r:2,fill:"#95D5B2"}),
-  React.createElement("path",{d:"M52 32 c4-8 2-16-4-20",fill:"none",stroke:"#95D5B2",strokeWidth:2,strokeLinecap:"round"}),
-  React.createElement("polygon",{points:"48,10 50,16 44,14",fill:"#95D5B2"}),
+  React.createElement("rect",{x:18,y:8,width:28,height:48,rx:4,fill:"none",stroke:"#D4A843",strokeWidth:2.5}),
+  React.createElement("circle",{cx:32,cy:50,r:2,fill:"#D4A843"}),
+  React.createElement("path",{d:"M52 32 c4-8 2-16-4-20",fill:"none",stroke:"#D4A843",strokeWidth:2,strokeLinecap:"round"}),
+  React.createElement("polygon",{points:"48,10 50,16 44,14",fill:"#D4A843"}),
 );
 
 // ── RotatePrompt ───────────────────────────────────────────
@@ -75,7 +75,7 @@ function RotatePrompt({onContinue}) {
   return React.createElement("div",{className:"fixed inset-0 flex flex-col items-center justify-center p-8",style:{background:"#0F2818",zIndex:100}},
     React.createElement(LogoSVG),
     React.createElement("h1",{className:"text-white text-2xl font-bold mt-6 mb-2 text-center"},"Marlborough MA"),
-    React.createElement("p",{className:"text-gold text-sm font-medium mb-8"},"Investment Analyzer"),
+    React.createElement("p",{style:{color:"#D4A843"},className:"text-sm font-medium mb-8"},"Investment Analyzer"),
     React.createElement("div",{className:"mb-4"},React.createElement(PhoneRotateIcon)),
     React.createElement("p",{className:"text-white text-lg font-semibold mb-2"},"Rotate to Landscape"),
     React.createElement("p",{className:"text-slate-400 text-sm mb-8 text-center"},"For the best experience on mobile"),
