@@ -30,48 +30,154 @@ const scoreColor = (s) => s >= 10 ? "text-emerald-700 bg-emerald-50" : s >= 8 ? 
 const scoreEmoji = (s) => s >= 10 ? "\u{1F7E2}" : s >= 7 ? "\u{1F7E1}" : "\u{1F534}";
 const gradeColor = (g) => g === "A" ? "bg-emerald-100 text-emerald-800" : g === "B" ? "bg-blue-100 text-blue-800" : g === "C" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600";
 const stratColor = (s) => s === "Flip" ? "bg-emerald-600" : s === "Hold" ? "bg-blue-600" : s === "BRRRR" ? "bg-purple-600" : s === "Value-Add" ? "bg-amber-600" : "bg-slate-400";
-const Logo = ({ size = 80, className = "" }) => React.createElement("svg", { viewBox: "0 0 64 64", width: size, height: size, className }, React.createElement("defs", null, React.createElement("linearGradient", { id: "navyGrad", x1: "0", y1: "0", x2: "1", y2: "1" }, React.createElement("stop", { offset: "0%", stopColor: "#1B4332" }), React.createElement("stop", { offset: "100%", stopColor: "#0F2818" })), React.createElement("linearGradient", { id: "goldGrad", x1: "0", y1: "0", x2: "0", y2: "1" }, React.createElement("stop", { offset: "0%", stopColor: "#B7E4C7" }), React.createElement("stop", { offset: "100%", stopColor: "#95D5B2" }))), React.createElement("rect", { width: "64", height: "64", rx: "15", fill: "url(#navyGrad)" }), React.createElement("rect", { x: "2", y: "2", width: "60", height: "60", rx: "13", fill: "none", stroke: "#95D5B2", strokeWidth: "0.5", opacity: "0.15" }), React.createElement("path", { d: "M32 11L12 24v2h40v-2L32 11z", fill: "url(#goldGrad)", opacity: "0.12" }), React.createElement("path", { d: "M12 24l20-13 20 13", stroke: "url(#goldGrad)", strokeWidth: "2.5", fill: "none", strokeLinecap: "round", strokeLinejoin: "round" }), React.createElement("path", { d: "M16 24v20h32V24", stroke: "#95D5B2", strokeWidth: "1.5", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", opacity: "0.6" }), React.createElement("rect", { x: "27", y: "33", width: "10", height: "11", rx: "1.5", stroke: "#95D5B2", strokeWidth: "1.5", fill: "rgba(212,168,67,0.08)" }), React.createElement("circle", { cx: "35", cy: "39", r: "0.8", fill: "#95D5B2" }), React.createElement("rect", { x: "19", y: "28", width: "6", height: "5", rx: "1", stroke: "#95D5B2", strokeWidth: "1.2", fill: "rgba(212,168,67,0.06)" }), React.createElement("rect", { x: "39", y: "28", width: "6", height: "5", rx: "1", stroke: "#95D5B2", strokeWidth: "1.2", fill: "rgba(212,168,67,0.06)" }), React.createElement("circle", { cx: "44", cy: "18", r: "6", stroke: "#95D5B2", strokeWidth: "1.5", fill: "none", opacity: "0.7" }), React.createElement("circle", { cx: "44", cy: "18", r: "2", fill: "#95D5B2", opacity: "0.7" }), React.createElement("path", { d: "M44 10.5v3M44 22.5v3M36.5 18h3M49.5 18h3", stroke: "#95D5B2", strokeWidth: "1", strokeLinecap: "round", opacity: "0.5" }), React.createElement("path", { d: "M8 48h48", stroke: "#95D5B2", strokeWidth: "1.5", strokeLinecap: "round", opacity: "0.25" }), React.createElement("path", { d: "M50 47l4-5", stroke: "#95D5B2", strokeWidth: "1.5", strokeLinecap: "round", opacity: "0.5" }), React.createElement("path", { d: "M52 42h2v2", stroke: "#95D5B2", strokeWidth: "1.2", strokeLinecap: "round", strokeLinejoin: "round", opacity: "0.5" }));
-const RotatePrompt = ({ onContinue }) => {
-  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+// ── SVG Icons ──────────────────────────────────────────────
+const LogoSVG = () => React.createElement("svg",{viewBox:"0 0 80 80",width:80,height:80,className:"mx-auto"},
+  React.createElement("rect",{x:10,y:35,width:60,height:40,rx:4,fill:"#1B4332",stroke:"#95D5B2",strokeWidth:2}),
+  React.createElement("polygon",{points:"40,8 5,38 75,38",fill:"#1B4332",stroke:"#95D5B2",strokeWidth:2}),
+  React.createElement("rect",{x:30,y:50,width:20,height:25,rx:2,fill:"#95D5B2",opacity:.8}),
+  React.createElement("circle",{cx:58,cy:22,r:14,fill:"none",stroke:"#95D5B2",strokeWidth:3}),
+  React.createElement("line",{x1:68,y1:32,x2:78,y2:42,stroke:"#95D5B2",strokeWidth:3,strokeLinecap:"round"}),
+  React.createElement("rect",{x:18,y:45,width:8,height:8,rx:1,fill:"#95D5B2",opacity:.5}),
+  React.createElement("rect",{x:54,y:45,width:8,height:8,rx:1,fill:"#95D5B2",opacity:.5}),
+);
+
+const PhoneRotateIcon = () => React.createElement("svg",{viewBox:"0 0 64 64",width:64,height:64,style:{animation:"rotatePhone 2s ease-in-out infinite"}},
+  React.createElement("rect",{x:18,y:8,width:28,height:48,rx:4,fill:"none",stroke:"#95D5B2",strokeWidth:2.5}),
+  React.createElement("circle",{cx:32,cy:50,r:2,fill:"#95D5B2"}),
+  React.createElement("path",{d:"M52 32 c4-8 2-16-4-20",fill:"none",stroke:"#95D5B2",strokeWidth:2,strokeLinecap:"round"}),
+  React.createElement("polygon",{points:"48,10 50,16 44,14",fill:"#95D5B2"}),
+);
+
+// ── RotatePrompt ───────────────────────────────────────────
+function RotatePrompt({onContinue}) {
+  const [landscape, setLandscape] = useState(false);
   useEffect(() => {
-    const check = () => setIsLandscape(window.innerWidth > window.innerHeight);
+    const check = () => {
+      if (window.innerWidth > window.innerHeight) {
+        setLandscape(true);
+      }
+    };
+    check();
     window.addEventListener("resize", check);
-    window.addEventListener("orientationchange", () => setTimeout(check, 200));
+    window.addEventListener("orientationchange", check);
     return () => {
       window.removeEventListener("resize", check);
       window.removeEventListener("orientationchange", check);
     };
   }, []);
   useEffect(() => {
-    if (isLandscape) {
-      const t = setTimeout(onContinue, 800);
+    if (landscape) {
+      const t = setTimeout(() => onContinue(), 800);
       return () => clearTimeout(t);
     }
-  }, [isLandscape, onContinue]);
-  return React.createElement("div", { className: "fixed inset-0 z-[9999] bg-navy flex flex-col items-center justify-center text-center p-6" }, React.createElement(Logo, { size: 72, className: "mb-6 opacity-80" }), !isLandscape ? React.createElement("div", { className: "fade-in" }, React.createElement("div", { className: "mb-8" }, React.createElement("svg", { viewBox: "0 0 100 100", width: "100", height: "100", className: "mx-auto" }, React.createElement("rect", { x: "30", y: "10", width: "40", height: "68", rx: "6", stroke: "#64748B", strokeWidth: "2", fill: "none", strokeDasharray: "4 3" }), React.createElement("circle", { cx: "50", cy: "70", r: "2.5", fill: "#64748B" }), React.createElement("path", { d: "M72 44c8-2 14 4 12 14", stroke: "#95D5B2", strokeWidth: "2.5", strokeLinecap: "round", fill: "none" }), React.createElement("path", { d: "M82 54l2 4-4.5 0.5", stroke: "#95D5B2", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round", fill: "none" }), React.createElement("rect", { x: "14", y: "78", width: "72", height: "40", rx: "6", stroke: "#95D5B2", strokeWidth: "2.5", fill: "rgba(212,168,67,0.08)" }), React.createElement("circle", { cx: "78", cy: "98", r: "2.5", fill: "#95D5B2" }), React.createElement("line", { x1: "22", y1: "86", x2: "66", y2: "86", stroke: "#95D5B2", strokeWidth: "1", opacity: "0.4" }), React.createElement("line", { x1: "22", y1: "92", x2: "66", y2: "92", stroke: "#95D5B2", strokeWidth: "1", opacity: "0.3" }), React.createElement("line", { x1: "22", y1: "98", x2: "66", y2: "98", stroke: "#95D5B2", strokeWidth: "1", opacity: "0.3" }), React.createElement("line", { x1: "22", y1: "104", x2: "66", y2: "104", stroke: "#95D5B2", strokeWidth: "1", opacity: "0.3" }), React.createElement("line", { x1: "22", y1: "110", x2: "66", y2: "110", stroke: "#95D5B2", strokeWidth: "1", opacity: "0.3" }))), React.createElement("h2", { className: "text-xl font-bold text-white mb-2" }, "Now Rotate to Landscape"), React.createElement("p", { className: "text-slate-400 text-sm max-w-xs mx-auto mb-10 leading-relaxed" }, "The property search and results table is optimized for landscape view. Turn your phone sideways for the best experience."), React.createElement("button", { onClick: onContinue, className: "text-slate-500 text-xs underline underline-offset-4 hover:text-slate-300 transition-colors" }, "Continue in portrait anyway")) : React.createElement("div", { className: "fade-in flex flex-col items-center" }, React.createElement("div", { className: "flex items-center gap-2 mb-4" }, React.createElement("div", { className: "w-3 h-3 rounded-full bg-emerald-400 animate-pulse" }), React.createElement("span", { className: "text-emerald-400 font-medium" }, "Landscape detected")), React.createElement("p", { className: "text-white text-lg font-bold mb-1" }, "Loading analyzer...")));
-};
+  }, [landscape, onContinue]);
+
+  return React.createElement("div",{className:"fixed inset-0 flex flex-col items-center justify-center p-8",style:{background:"#0F2818",zIndex:100}},
+    React.createElement(LogoSVG),
+    React.createElement("h1",{className:"text-white text-2xl font-bold mt-6 mb-2 text-center"},"Marlborough MA"),
+    React.createElement("p",{className:"text-gold text-sm font-medium mb-8"},"Investment Analyzer"),
+    React.createElement("div",{className:"mb-4"},React.createElement(PhoneRotateIcon)),
+    React.createElement("p",{className:"text-white text-lg font-semibold mb-2"},"Rotate to Landscape"),
+    React.createElement("p",{className:"text-slate-400 text-sm mb-8 text-center"},"For the best experience on mobile"),
+    React.createElement("button",{onClick:onContinue,className:"text-slate-500 text-xs underline hover:text-slate-300 transition-colors"},"Continue in portrait anyway"),
+  );
+}
+
+// ── IntroGuide ─────────────────────────────────────────────
 const IntroOverlay = ({ onClose }) => {
-  const [pg, setPg] = useState(0);
+  const [page, setPage] = useState(0);
   const pages = [
-    {
-      title: "Welcome to Your Marlborough Investment Analyzer",
-      content: React.createElement("div", { className: "space-y-4 text-slate-600" }, React.createElement("p", { className: "text-lg" }, "This tool was built specifically for you to identify, evaluate, and prioritize real estate investment opportunities across ", React.createElement("strong", { className: "text-navy" }, "all 10,802+ properties in Marlborough, MA"), "."), React.createElement("p", null, "Every property has been scored using a proprietary model that combines ", React.createElement("strong", null, "public assessor data"), ", ", React.createElement("strong", null, "predictive lead scoring"), " (how likely the owner is to sell), and ", React.createElement("strong", null, "real-time market analysis"), " to surface the best deals across four strategies:"), React.createElement("div", { className: "grid grid-cols-2 gap-3 mt-4" }, React.createElement("div", { className: "bg-emerald-50 rounded-lg p-3 border border-emerald-200" }, React.createElement("span", { className: "text-xs font-bold text-emerald-700 uppercase" }, "Fix & Flip"), React.createElement("p", { className: "text-sm mt-1" }, "Buy, renovate, sell for profit.")), React.createElement("div", { className: "bg-blue-50 rounded-lg p-3 border border-blue-200" }, React.createElement("span", { className: "text-xs font-bold text-blue-700 uppercase" }, "Buy & Hold"), React.createElement("p", { className: "text-sm mt-1" }, "Multifamily properties with rental income potential.")), React.createElement("div", { className: "bg-purple-50 rounded-lg p-3 border border-purple-200" }, React.createElement("span", { className: "text-xs font-bold text-purple-700 uppercase" }, "BRRRR"), React.createElement("p", { className: "text-sm mt-1" }, "Buy, Rehab, Rent, Refinance, Repeat. Pull your capital back out.")), React.createElement("div", { className: "bg-amber-50 rounded-lg p-3 border border-amber-200" }, React.createElement("span", { className: "text-xs font-bold text-amber-700 uppercase" }, "Value-Add"), React.createElement("p", { className: "text-sm mt-1" }, "Teardown/rebuild, ADU, or expansion opportunities."))))
-    },
-    {
-      title: "How the Scoring Works",
-      content: React.createElement("div", { className: "space-y-4 text-slate-600" }, React.createElement("p", null, "Every property receives an ", React.createElement("strong", { className: "text-navy" }, "Investment Score from 0 to 12"), ", calculated from four equally weighted factors:"), React.createElement("div", { className: "space-y-3" }, React.createElement("div", { className: "flex items-start gap-3 bg-slate-50 rounded-lg p-3" }, React.createElement("span", { className: "text-2xl font-bold text-navy w-8 text-center" }, "1"), React.createElement("div", null, React.createElement("strong", null, "Price Efficiency (0-3 pts)"), React.createElement("p", { className: "text-sm" }, "How far below market the assessed $/sqft is. Lower = more upside."))), React.createElement("div", { className: "flex items-start gap-3 bg-slate-50 rounded-lg p-3" }, React.createElement("span", { className: "text-2xl font-bold text-navy w-8 text-center" }, "2"), React.createElement("div", null, React.createElement("strong", null, "Seller Motivation (0-3 pts)"), React.createElement("p", { className: "text-sm" }, "How long the owner has held the property. 50+ years = very likely to sell."))), React.createElement("div", { className: "flex items-start gap-3 bg-slate-50 rounded-lg p-3" }, React.createElement("span", { className: "text-2xl font-bold text-navy w-8 text-center" }, "3"), React.createElement("div", null, React.createElement("strong", null, "Profit Potential (0-3 pts)"), React.createElement("p", { className: "text-sm" }, "Estimated ROI based on purchase price, renovation costs, and ARV."))), React.createElement("div", { className: "flex items-start gap-3 bg-slate-50 rounded-lg p-3" }, React.createElement("span", { className: "text-2xl font-bold text-navy w-8 text-center" }, "4"), React.createElement("div", null, React.createElement("strong", null, "Lead Quality (0-3 pts)"), React.createElement("p", { className: "text-sm" }, "Predictive lead score and grade \u2014 how likely the owner is to sell soon.")))), React.createElement("div", { className: "flex gap-4 mt-3 text-sm" }, React.createElement("span", { className: "px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold" }, "10-12 = Strong"), React.createElement("span", { className: "px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-bold" }, "7-9 = Moderate"), React.createElement("span", { className: "px-3 py-1 rounded-full bg-slate-100 text-slate-600 font-bold" }, "3-6 = Worth Watching")))
-    },
-    {
-      title: "How to Use This Tool",
-      content: React.createElement("div", { className: "space-y-4 text-slate-600" }, React.createElement("div", { className: "space-y-3" }, React.createElement("div", { className: "flex items-start gap-3" }, React.createElement("span", { className: "bg-gold text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0" }, "1"), React.createElement("div", null, React.createElement("strong", null, "Filter & Search"), React.createElement("p", { className: "text-sm" }, "Use the filters to narrow results by strategy, score, price, lead grade, and more. Type an address or owner name in the search bar."))), React.createElement("div", { className: "flex items-start gap-3" }, React.createElement("span", { className: "bg-gold text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0" }, "2"), React.createElement("div", null, React.createElement("strong", null, "Click Any Row to Expand"), React.createElement("p", { className: "text-sm" }, "See full investment analysis with flip, hold, and BRRRR breakdowns. ", React.createElement("strong", null, "Edit any number"), " (purchase price, reno budget, ARV, rent) and watch all metrics recalculate in real time."))), React.createElement("div", { className: "flex items-start gap-3" }, React.createElement("span", { className: "bg-gold text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0" }, "3"), React.createElement("div", null, React.createElement("strong", null, "Star Properties to Build Your List"), React.createElement("p", { className: "text-sm" }, "Click the star icon on any property to add it to your shortlist. Add as many as you want. Use \"Compare\" to view side-by-side metrics."))), React.createElement("div", { className: "flex items-start gap-3" }, React.createElement("span", { className: "bg-gold text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0" }, "4"), React.createElement("div", null, React.createElement("strong", null, "Send Your List"), React.createElement("p", { className: "text-sm" }, "When you have properties you want to pursue, hit ", React.createElement("strong", null, "\"Send List to Zev\""), " to email your shortlist directly. You can also download it as a CSV.")))), React.createElement("div", { className: "bg-navy/5 rounded-lg p-4 mt-4 border border-navy/10" }, React.createElement("p", { className: "text-sm" }, React.createElement("strong", null, "Tip:"), " All estimated values (ARV, reno budget, rent) are starting points based on market data. When you expand a property, override any field with your own numbers to get a custom analysis.")))
-    },
-    {
-      title: "Important Notes on the Data",
-      content: React.createElement("div", { className: "space-y-4 text-slate-600" }, React.createElement("div", { className: "bg-amber-50 border border-amber-200 rounded-lg p-4" }, React.createElement("p", { className: "font-bold text-amber-800 mb-2" }, "Assessed values are NOT market values"), React.createElement("p", { className: "text-sm" }, "Marlborough\'s assessed values typically lag true market value by 10-25%. This means the \"Assessed Value\" column is usually below what the owner would actually accept. Always verify with comps before making an offer.")), React.createElement("div", { className: "bg-blue-50 border border-blue-200 rounded-lg p-4" }, React.createElement("p", { className: "font-bold text-blue-800 mb-2" }, "Lead Score predicts seller likelihood"), React.createElement("p", { className: "text-sm" }, "Grade A (score 9-12) owners are statistically the most likely to sell \u2014 often long-tenure seniors, estate situations, or investors looking to exit. Prioritize Grade A and B for outreach.")), React.createElement("div", { className: "bg-emerald-50 border border-emerald-200 rounded-lg p-4" }, React.createElement("p", { className: "font-bold text-emerald-800 mb-2" }, "ARV & renovation estimates are starting points"), React.createElement("p", { className: "text-sm" }, "The estimated After-Repair Value uses market $/sqft from recent comps. Renovation budgets default to $85/sqft. Override these in the property detail view with your own research for a more accurate analysis.")), React.createElement("p", { className: "text-sm text-slate-500 mt-3" }, "Market data sourced from Redfin, Zillow, RentCafe, Freddie Mac, and Marlborough Assessor\'s Office (Feb 2026)."))
-    }
+    // Page 0: Welcome
+    () => React.createElement("div",{className:"fade-in"},
+      React.createElement("h2",{className:"text-2xl font-bold text-navy mb-2"},"Welcome to Your Investment Analyzer"),
+      React.createElement("p",{className:"text-slate-500 mb-6"},"We've analyzed 10,800+ Marlborough properties and scored each for investment potential."),
+      React.createElement("div",{className:"grid grid-cols-2 gap-3"},
+        ...[["Flip","Buy, renovate, sell for profit","bg-emerald-50 border-emerald-200 text-emerald-700"],
+            ["Hold","Long-term rental income","bg-blue-50 border-blue-200 text-blue-700"],
+            ["BRRRR","Buy, Rehab, Rent, Refinance, Repeat","bg-purple-50 border-purple-200 text-purple-700"],
+            ["Value-Add","Underdeveloped land or repositioning","bg-amber-50 border-amber-200 text-amber-700"]
+        ].map(([t,d,c]) => React.createElement("div",{key:t,className:"rounded-lg border p-3 "+c},
+          React.createElement("div",{className:"font-bold text-sm mb-1"},t),
+          React.createElement("div",{className:"text-xs opacity-75"},d)
+        ))
+      ),
+    ),
+    // Page 1: Scoring
+    () => React.createElement("div",{className:"fade-in"},
+      React.createElement("h2",{className:"text-2xl font-bold text-navy mb-2"},"How Properties Are Scored"),
+      React.createElement("p",{className:"text-slate-500 mb-4"},"Each property is scored 0–12 across four factors (3 points each):"),
+      React.createElement("div",{className:"grid grid-cols-2 gap-3 mb-4"},
+        ...[["Price Efficiency","$/sqft relative to area median"],
+            ["Seller Motivation","Years of ownership (tenure)"],
+            ["Profit Potential","Estimated flip ROI %"],
+            ["Lead Quality","Predictive lead score & grade"]
+        ].map(([t,d]) => React.createElement("div",{key:t,className:"bg-slate-50 rounded-lg p-3"},
+          React.createElement("div",{className:"font-semibold text-sm text-navy"},t),
+          React.createElement("div",{className:"text-xs text-slate-500"},d)
+        ))
+      ),
+      React.createElement("div",{className:"flex gap-3 items-center justify-center"},
+        ...[["10–12","Strong","bg-emerald-500 text-white"],
+            ["7–9","Moderate","bg-amber-400 text-amber-900"],
+            ["3–6","Worth Watching","bg-slate-300 text-slate-700"]
+        ].map(([r,l,c]) => React.createElement("div",{key:r,className:"flex items-center gap-2"},
+          React.createElement("span",{className:"inline-block px-2 py-1 rounded-full text-xs font-bold "+c},r),
+          React.createElement("span",{className:"text-sm text-slate-600"},l)
+        ))
+      ),
+    ),
+    // Page 2: How to Use
+    () => React.createElement("div",{className:"fade-in"},
+      React.createElement("h2",{className:"text-2xl font-bold text-navy mb-4"},"How to Use"),
+      React.createElement("div",{className:"grid grid-cols-2 gap-4"},
+        ...[[1,"Filter & Search","Use strategy chips, grade filters, and the search bar to narrow results"],
+            [2,"Click to Expand","Tap any property row to see full financial analysis with editable inputs"],
+            [3,"Star Properties","Build a shortlist by starring your favorite opportunities"],
+            [4,"Send Your List","Email your shortlist or download as CSV for further analysis"]
+        ].map(([n,t,d]) => React.createElement("div",{key:n,className:"flex gap-3"},
+          React.createElement("div",{className:"flex-none w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center font-bold text-sm"},n),
+          React.createElement("div",null,
+            React.createElement("div",{className:"font-semibold text-navy text-sm"},t),
+            React.createElement("div",{className:"text-xs text-slate-500"},d)
+          )
+        ))
+      ),
+    ),
+    // Page 3: Data Notes
+    () => React.createElement("div",{className:"fade-in"},
+      React.createElement("h2",{className:"text-2xl font-bold text-navy mb-4"},"Important Data Notes"),
+      React.createElement("div",{className:"space-y-3"},
+        ...[["Assessed Values","City assessments typically lag market value by 10–20%. Actual purchase prices will differ.","bg-blue-50 border-blue-200"],
+            ["Lead Scores","Our predictive model scores seller likelihood based on tenure, ownership patterns, and property characteristics.","bg-emerald-50 border-emerald-200"],
+            ["ARV & Reno Estimates","After-repair values and renovation costs are starting points. Always verify with local comps and contractor bids.","bg-amber-50 border-amber-200"]
+        ].map(([t,d,c]) => React.createElement("div",{key:t,className:"rounded-lg border p-4 "+c},
+          React.createElement("div",{className:"font-bold text-sm text-navy mb-1"},t),
+          React.createElement("div",{className:"text-xs text-slate-600 leading-relaxed"},d)
+        ))
+      ),
+    ),
   ];
-  const p = pages[pg];
-  return React.createElement("div", { className: "fixed inset-0 z-50 overlay-bg flex items-end md:items-center justify-center p-0 md:p-4" }, React.createElement("div", { className: "bg-white md:rounded-2xl rounded-t-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col" }, React.createElement("div", { className: "flex gap-1.5 px-5 md:px-8 pt-5 md:pt-6" }, pages.map((_, i) => React.createElement("div", { key: i, className: "h-1.5 flex-1 rounded-full transition-colors " + (i <= pg ? "bg-gold" : "bg-slate-200") }))), React.createElement("div", { className: "px-5 md:px-8 py-5 md:py-6 flex-1 overflow-y-auto slide-in", key: pg }, React.createElement("h2", { className: "text-xl md:text-2xl font-bold text-navy mb-3 md:mb-4" }, p.title), p.content), React.createElement("div", { className: "px-5 md:px-8 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50" }, React.createElement("button", { onClick: () => pg > 0 ? setPg(pg - 1) : onClose(), className: "px-4 py-2.5 text-sm text-slate-500 hover:text-slate-700" }, pg > 0 ? "\u2190 Back" : "Skip"), React.createElement("span", { className: "text-xs text-slate-400" }, pg + 1, " of ", pages.length), pg < pages.length - 1 ? React.createElement("button", { onClick: () => setPg(pg + 1), className: "px-6 py-2.5 bg-navy text-white rounded-lg text-sm font-bold hover:bg-navy-light transition-colors" }, "Next ", "\u2192") : React.createElement("button", { onClick: onClose, className: "px-6 py-2.5 bg-gold text-white rounded-lg text-sm font-bold hover:bg-gold-dark transition-colors" }, "Get Started ", "\u2192"))));
+
+  return React.createElement("div",{className:"fixed inset-0 flex items-center justify-center p-4",style:{background:"rgba(15,26,46,.9)",zIndex:90}},
+    React.createElement("div",{className:"bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 slide-in"},
+      // Progress dots
+      React.createElement("div",{className:"flex justify-center gap-2 mb-6"},
+        ...pages.map((_,i) => React.createElement("div",{key:i,className:"w-2.5 h-2.5 rounded-full transition-colors "+(i===page?"bg-gold":"bg-slate-200")}))
+      ),
+      // Content
+      pages[page](),
+      // Navigation
+      React.createElement("div",{className:"flex items-center justify-between mt-6 pt-4 border-t border-slate-100"},
+        React.createElement("button",{onClick:onClose,className:"text-slate-400 text-sm hover:text-slate-600"},"Skip"),
+        React.createElement("div",{className:"text-sm text-slate-400"},page+1+" / "+pages.length),
+        page < pages.length - 1
+          ? React.createElement("button",{onClick:()=>setPage(page+1),className:"bg-navy text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-navy-light transition-colors"},
+              "Next \u2192")
+          : React.createElement("button",{onClick:onClose,className:"bg-gold text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-gold-light transition-colors"},
+              "Get Started \u2192")
+      ),
+    ),
+  );
 };
 const Card = ({ label, value, sub, icon }) => React.createElement("div", { className: "bg-white rounded-xl shadow-sm border border-slate-200 p-2.5 md:p-4 flex flex-col" }, React.createElement("div", { className: "text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5" }, icon, " ", label), React.createElement("div", { className: "text-lg md:text-2xl font-bold text-navy leading-tight" }, value), sub && React.createElement("div", { className: "text-[10px] md:text-xs text-slate-500 mt-0.5" }, sub));
 const RangeSlider = ({ min, max, step = 1, value, onChange, label, suffix = "" }) => {
