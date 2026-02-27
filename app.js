@@ -206,16 +206,18 @@ const FilterBar = ({ filters, setFilters, villages, filtered }) => {
 const Row = ({ label, value, highlight }) => React.createElement("div", { className: "flex items-center justify-between py-0.5 " + (highlight ? "font-bold" : "") }, React.createElement("span", { className: "text-[10px] lg:text-xs " + (highlight ? "text-navy" : "text-slate-600") }, label), React.createElement("span", { className: "text-[11px] lg:text-sm font-medium " + (highlight ? "text-navy" : "text-slate-700") }, value));
 const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
   const [btnText, setBtnText] = useState("Recalculate Analysis");
-  const parseNum = s => parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0;
-  const [inputs, setInputs] = useState(function() {
-    var f = function(n) { return String(Math.round(n || 0)); };
-    return {
-      purchase: f(prop.assessedValue), reno: f(prop.estRenoBudget),
-      arv: f(prop.estARV), rent: f(prop.estMonthlyRent),
-      rate: (market.mortgageRate * 100).toFixed(1), down: String(market.downPaymentPct * 100),
-      hold: String(prop.strategy === "Flip" ? market.holdingMonths_flip : 12), comm: "4.0"
-    };
-  });
+  const _id = "di-" + prop.id.replace(/\s/g,"") + "-";
+  const _rd = function(id) { var el = document.getElementById(id); return el ? parseFloat(String(el.value).replace(/[^0-9.]/g,"")) || 0 : 0; };
+  const _defaults = {
+    purchase: Math.round(prop.assessedValue || 0).toLocaleString(),
+    reno: Math.round(prop.estRenoBudget || 0).toLocaleString(),
+    arv: Math.round(prop.estARV || 0).toLocaleString(),
+    rent: Math.round(prop.estMonthlyRent || 0).toLocaleString(),
+    rate: (market.mortgageRate * 100).toFixed(1),
+    down: String(market.downPaymentPct * 100),
+    hold: String(prop.strategy === "Flip" ? market.holdingMonths_flip : 12),
+    comm: "4.0"
+  };
 
 
   const runCalc = (vals) => {
@@ -273,10 +275,10 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
   const handleRecalc = () => {
     setBtnText("Calculating...");
     setCalc(runCalc({
-      purchasePrice: parseNum(inputs.purchase), renoBudget: parseNum(inputs.reno),
-      arvEstimate: parseNum(inputs.arv), monthlyRent: parseNum(inputs.rent),
-      interestRate: parseNum(inputs.rate), downPayment: parseNum(inputs.down),
-      holdingMonths: parseNum(inputs.hold), comm: parseNum(inputs.comm)
+      purchasePrice: _rd(_id+"purchase"), renoBudget: _rd(_id+"reno"),
+      arvEstimate: _rd(_id+"arv"), monthlyRent: _rd(_id+"rent"),
+      interestRate: _rd(_id+"rate"), downPayment: _rd(_id+"down"),
+      holdingMonths: _rd(_id+"hold"), comm: _rd(_id+"comm")
     }));
     setTimeout(() => {
       setBtnText("Updated \u2713");
@@ -310,8 +312,8 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
                 React.createElement("span", { className: "text-[10px] lg:text-xs text-slate-600" }, label),
                 React.createElement("div", { className: "flex items-center gap-0.5" },
                   prefixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, prefixes[i]),
-                  React.createElement("input", { type: "text", inputMode: "decimal", value: inputs[fields[i]] || "",
-                    onChange: function(e) { var f = fields[i]; setInputs(function(prev) { var n = {}; for (var k in prev) n[k] = prev[k]; n[f] = e.target.value; return n; }); },
+                  React.createElement("input", { type: "text", inputMode: "decimal", id: _id + fields[i],
+                    defaultValue: _defaults[fields[i]],
                     className: "w-20 lg:w-24 text-right text-[11px] lg:text-sm font-medium px-1.5 py-0.5 border border-slate-200 rounded focus:ring-2 focus:ring-gold/40 focus:outline-none" }),
                   suffixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, suffixes[i])));
             }),
