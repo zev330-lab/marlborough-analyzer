@@ -207,12 +207,14 @@ const Row = ({ label, value, highlight }) => React.createElement("div", { classN
 const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
   const [btnText, setBtnText] = useState("Recalculate Analysis");
   const parseNum = s => parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0;
-  const fmtInit = n => Math.round(n).toLocaleString();
-  const [inputs, setInputs] = useState({
-    purchase: fmtInit(prop.assessedValue), reno: fmtInit(prop.estRenoBudget),
-    arv: fmtInit(prop.estARV), rent: fmtInit(prop.estMonthlyRent),
-    rate: (market.mortgageRate * 100).toFixed(1), down: String(market.downPaymentPct * 100),
-    hold: String(prop.strategy === "Flip" ? market.holdingMonths_flip : 12), comm: "4.0"
+  const [inputs, setInputs] = useState(function() {
+    var f = function(n) { return String(Math.round(n || 0)); };
+    return {
+      purchase: f(prop.assessedValue), reno: f(prop.estRenoBudget),
+      arv: f(prop.estARV), rent: f(prop.estMonthlyRent),
+      rate: (market.mortgageRate * 100).toFixed(1), down: String(market.downPaymentPct * 100),
+      hold: String(prop.strategy === "Flip" ? market.holdingMonths_flip : 12), comm: "4.0"
+    };
   });
 
 
