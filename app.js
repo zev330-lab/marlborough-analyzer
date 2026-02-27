@@ -218,6 +218,12 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     hold: String(prop.strategy === "Flip" ? market.holdingMonths_flip : 12),
     comm: "4.0"
   };
+  useEffect(function() {
+    ["purchase","reno","arv","rent","rate","down","hold","comm"].forEach(function(f) {
+      var el = document.getElementById(_id + f);
+      if (el && _defaults[f] != null) el.value = _defaults[f];
+    });
+  }, []);
 
 
   const runCalc = (vals) => {
@@ -314,6 +320,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
                   prefixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, prefixes[i]),
                   React.createElement("input", { type: "text", inputMode: "decimal", id: _id + fields[i],
                     defaultValue: _defaults[fields[i]],
+                    style: {color: "#111"},
                     className: "w-20 lg:w-24 text-right text-[11px] lg:text-sm font-medium px-1.5 py-0.5 border border-slate-200 rounded focus:ring-2 focus:ring-gold/40 focus:outline-none" }),
                   suffixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, suffixes[i])));
             }),
