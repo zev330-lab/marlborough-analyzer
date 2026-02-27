@@ -98,28 +98,44 @@ const FilterBar = ({ filters, setFilters, villages, filtered }) => {
   return React.createElement("div", { className: "bg-white rounded-xl shadow-sm border border-slate-200 p-2 lg:p-3 no-print" }, React.createElement("div", { className: "flex items-center gap-2 flex-wrap" }, React.createElement("input", { type: "text", placeholder: "Search address, owner...", value: filters.search, onChange: (e) => setFilters((f) => ({ ...f, search: e.target.value })), className: "flex-1 min-w-[120px] max-w-[200px] lg:max-w-[260px] px-2.5 py-1.5 text-[11px] lg:text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/40" }), strategies.map((s) => React.createElement(Chip, { key: s, label: s, active: filters.strategies.includes(s), onClick: () => toggle("strategies", s), color: filters.strategies.includes(s) ? stratColor(s) + " text-white" : "", small: true })), grades.map((g) => React.createElement(Chip, { key: g, label: g, active: filters.grades.includes(g), onClick: () => toggle("grades", g), small: true })), React.createElement("span", { className: "text-[10px] text-slate-400 font-medium ml-auto" }, filtered, " results"), React.createElement("button", { onClick: () => setShowMore(!showMore), className: "text-[10px] text-gold font-semibold hover:text-gold-dark" }, showMore ? "Less" : "More"), React.createElement("button", { onClick: resetFilters, className: "text-[10px] text-slate-400 hover:text-red-400" }, "Reset")), showMore && React.createElement("div", { className: "mt-2 pt-2 border-t border-slate-100 fade-in" }, React.createElement("div", { className: "grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2" }, React.createElement(RangeSlider, { label: "Min Score", min: 0, max: 12, value: filters.minScore, onChange: (e) => setFilters((f) => ({ ...f, minScore: +e.target.value })) }), React.createElement(RangeSlider, { label: "Min Tenure", min: 0, max: 125, value: filters.minTenure, onChange: (e) => setFilters((f) => ({ ...f, minTenure: +e.target.value })), suffix: " yrs" }), React.createElement(RangeSlider, { label: "Min ROI", min: 0, max: 100, step: 5, value: filters.minROI, onChange: (e) => setFilters((f) => ({ ...f, minROI: +e.target.value })), suffix: "%" }), React.createElement("div", null, React.createElement("div", { className: "text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1" }, "Price Range"), React.createElement("div", { className: "flex gap-1" }, React.createElement("input", { type: "number", step: "50000", placeholder: "Min", value: filters.minPrice || "", onChange: (e) => setFilters((f) => ({ ...f, minPrice: +e.target.value })), className: "w-full px-1.5 py-1 text-[11px] border border-slate-200 rounded" }), React.createElement("input", { type: "number", step: "50000", placeholder: "Max", value: filters.maxPrice < 1e7 ? filters.maxPrice : "", onChange: (e) => setFilters((f) => ({ ...f, maxPrice: +e.target.value || 1e7 })), className: "w-full px-1.5 py-1 text-[11px] border border-slate-200 rounded" })))), React.createElement("div", { className: "flex items-center gap-2 mt-2 flex-wrap" }, React.createElement("span", { className: "text-[10px] text-slate-400 font-semibold" }, "Type:"), types.map((t) => React.createElement(Chip, { key: t, label: t, active: filters.types.includes(typeMap[t]), onClick: () => toggle("types", typeMap[t]), small: true })), React.createElement("span", { className: "text-[10px] text-slate-400 font-semibold ml-2" }, "Village:"), React.createElement("select", { value: filters.villages[0] || "", onChange: (e) => setFilters((f) => ({ ...f, villages: e.target.value ? [e.target.value] : [] })), className: "text-[11px] border border-slate-200 rounded px-1.5 py-1" }, React.createElement("option", { value: "" }, "All"), villages.map((v) => React.createElement("option", { key: v, value: v }, v))))));
 };
 const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
-  const [overrides, setOverrides] = useState({
+  const purchaseRef = useRef(null);
+  const renoRef = useRef(null);
+  const arvRef = useRef(null);
+  const rentRef = useRef(null);
+  const rateRef = useRef(null);
+  const downRef = useRef(null);
+  const holdRef = useRef(null);
+  const buyCommRef = useRef(null);
+  const sellCommRef = useRef(null);
+  const [btnText, setBtnText] = useState("Recalculate Analysis");
+
+  const defaults = {
     purchasePrice: prop.assessedValue,
     renoBudget: prop.estRenoBudget,
     arvEstimate: prop.estARV,
     monthlyRent: prop.estMonthlyRent,
     interestRate: market.mortgageRate * 100,
     downPayment: market.downPaymentPct * 100,
-    holdingMonths: prop.strategy === "Flip" ? market.holdingMonths_flip : 12
-  });
-  const set = (k, v) => setOverrides((o) => ({ ...o, [k]: v }));
-  const calc = useMemo(() => {
-    const pp = overrides.purchasePrice;
-    const reno = overrides.renoBudget;
-    const arv = overrides.arvEstimate;
-    const rent = overrides.monthlyRent;
-    const rate = overrides.interestRate / 100;
-    const dp = overrides.downPayment / 100;
-    const months = overrides.holdingMonths;
+    holdingMonths: prop.strategy === "Flip" ? market.holdingMonths_flip : 12,
+    buyComm: 4,
+    sellComm: 5
+  };
+
+  const runCalc = (vals) => {
+    const pp = vals.purchasePrice;
+    const reno = vals.renoBudget;
+    const arv = vals.arvEstimate;
+    const rent = vals.monthlyRent;
+    const rate = vals.interestRate / 100;
+    const dp = vals.downPayment / 100;
+    const months = vals.holdingMonths;
+    const buyCommPct = vals.buyComm;
+    const sellCommPct = vals.sellComm;
     const holdCost = pp * (rate * months / 12);
+    const buyerComm = pp * (buyCommPct / 100);
     const closingCost = pp * market.closingCostPct;
-    const sellingCost = arv * market.sellingCostPct;
-    const totalCost = reno + holdCost + closingCost + sellingCost;
+    const sellingCost = arv * (sellCommPct / 100);
+    const totalCost = reno + holdCost + closingCost + sellingCost + buyerComm;
     const netProfit = arv - pp - totalCost;
     const roi = pp + reno > 0 ? netProfit / (pp + reno) * 100 : 0;
     const loanAmt = pp * (1 - dp);
@@ -148,11 +164,106 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
       if (prop.leadScore >= 11 && prop.leadGrade === "A") s += 3; else if (prop.leadScore >= 9 || prop.leadGrade === "A") s += 2; else if (prop.leadScore >= 7 || prop.leadGrade === "B") s += 1;
       return s;
     })();
-    return { netProfit, roi, holdCost, closingCost, sellingCost, totalCost, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
-  }, [overrides, market, prop]);
-  const InputField = ({ label, value, onChange, prefix, suffix }) => React.createElement("div", { className: "flex items-center justify-between py-1 border-b border-slate-100" }, React.createElement("span", { className: "text-[10px] lg:text-xs text-slate-600" }, label), React.createElement("div", { className: "flex items-center gap-0.5" }, prefix && React.createElement("span", { className: "text-[10px] text-slate-400" }, prefix), React.createElement("input", { type: "number", value, onChange: (e) => onChange(+e.target.value), className: "w-20 lg:w-24 text-right text-[11px] lg:text-sm font-medium px-1.5 py-0.5 border border-slate-200 rounded focus:ring-2 focus:ring-gold/40 focus:outline-none" }), suffix && React.createElement("span", { className: "text-[10px] text-slate-400" }, suffix)));
+    return { pp, reno, arv, rent, netProfit, roi, holdCost, closingCost, sellingCost, buyerComm, totalCost, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
+  };
+
+  const [calc, setCalc] = useState(() => runCalc(defaults));
+
+  const parseVal = (ref) => {
+    const raw = ref.current ? ref.current.value : "0";
+    return parseFloat(raw.replace(/[$,%]/g, "").replace(/,/g, "")) || 0;
+  };
+
+  const handleRecalc = () => {
+    setBtnText("Calculating...");
+    const vals = {
+      purchasePrice: parseVal(purchaseRef),
+      renoBudget: parseVal(renoRef),
+      arvEstimate: parseVal(arvRef),
+      monthlyRent: parseVal(rentRef),
+      interestRate: parseVal(rateRef),
+      downPayment: parseVal(downRef),
+      holdingMonths: parseVal(holdRef),
+      buyComm: parseVal(buyCommRef),
+      sellComm: parseVal(sellCommRef),
+    };
+    const result = runCalc(vals);
+    setCalc(result);
+    setTimeout(() => {
+      setBtnText("Updated \u2713");
+      setTimeout(() => setBtnText("Recalculate Analysis"), 1500);
+    }, 100);
+  };
+
+  const fmtDef = (n) => Math.round(n).toLocaleString();
   const Row = ({ label, value, highlight }) => React.createElement("div", { className: "flex justify-between py-0.5 text-[11px] lg:text-sm " + (highlight ? "font-bold text-navy" : "text-slate-600") }, React.createElement("span", null, label), React.createElement("span", { className: highlight ? "text-sm lg:text-lg" : "" }, value));
-  return React.createElement("div", { className: "detail-modal", onClick: (e) => { if (e.target === e.currentTarget) onClose(); } }, React.createElement("div", { className: "bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto my-2 lg:my-6 overflow-hidden" }, React.createElement("div", { className: "bg-navy text-white px-3 lg:px-6 py-3 flex items-center justify-between" }, React.createElement("div", { className: "min-w-0" }, React.createElement("h3", { className: "text-sm lg:text-xl font-bold truncate" }, prop.address), React.createElement("p", { className: "text-[10px] lg:text-sm text-slate-300 truncate" }, prop.village, ", MA ", prop.zip, " \u00B7 ", prop.homeType, " \u00B7 ", prop.owner)), React.createElement("div", { className: "flex gap-2 flex-shrink-0 ml-2" }, React.createElement("button", { onClick: () => onToggleStar(prop.id), className: "px-2 lg:px-3 py-1.5 rounded-lg text-[11px] lg:text-sm font-medium transition-all " + (isStarred ? "bg-gold text-white" : "bg-white/10 text-white hover:bg-white/20") }, isStarred ? "\u2605" : "\u2606"), React.createElement("button", { onClick: onClose, className: "px-2 lg:px-3 py-1.5 rounded-lg text-[11px] lg:text-sm bg-white/10 text-white hover:bg-white/20" }, "\u2715"))), React.createElement("div", { className: "px-3 lg:px-6 py-3 lg:py-4" }, React.createElement("div", { className: "flex items-center gap-2 mb-3 flex-wrap" }, React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold text-white " + stratColor(prop.strategy) }, prop.strategy), React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold " + scoreColor(calc.score) }, "Score: ", calc.score, "/12"), React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold " + gradeColor(prop.leadGrade) }, "Grade ", prop.leadGrade), prop.yearBuilt && React.createElement("span", { className: "text-[10px] text-slate-400" }, "Built ", prop.yearBuilt)), React.createElement("div", { className: "grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6" }, React.createElement("div", { className: "space-y-0.5 col-span-2 lg:col-span-1" }, React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-gold pb-1" }, "Adjustable Inputs"), React.createElement(InputField, { label: "Purchase", value: overrides.purchasePrice, onChange: (v) => set("purchasePrice", v), prefix: "$" }), React.createElement(InputField, { label: "Reno Budget", value: overrides.renoBudget, onChange: (v) => set("renoBudget", v), prefix: "$" }), React.createElement(InputField, { label: "ARV", value: overrides.arvEstimate, onChange: (v) => set("arvEstimate", v), prefix: "$" }), React.createElement(InputField, { label: "Rent/mo", value: overrides.monthlyRent, onChange: (v) => set("monthlyRent", v), prefix: "$" }), React.createElement(InputField, { label: "Rate", value: overrides.interestRate, onChange: (v) => set("interestRate", v), suffix: "%" }), React.createElement(InputField, { label: "Down Pmt", value: overrides.downPayment, onChange: (v) => set("downPayment", v), suffix: "%" }), React.createElement(InputField, { label: "Hold", value: overrides.holdingMonths, onChange: (v) => set("holdingMonths", v), suffix: "mo" })), React.createElement("div", { className: "space-y-0.5" }, React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-emerald-500 pb-1" }, "Flip Analysis"), React.createElement(Row, { label: "Purchase", value: fmt(overrides.purchasePrice) }), React.createElement(Row, { label: "+ Reno", value: fmt(overrides.renoBudget) }), React.createElement(Row, { label: "+ Hold", value: fmt(calc.holdCost) }), React.createElement(Row, { label: "+ Closing", value: fmt(calc.closingCost) }), React.createElement(Row, { label: "+ Selling", value: fmt(calc.sellingCost) }), React.createElement(Row, { label: "ARV", value: fmt(overrides.arvEstimate) }), React.createElement("div", { className: "border-t-2 border-navy pt-1 mt-1" }, React.createElement(Row, { label: "Profit", value: fmt(calc.netProfit), highlight: true }), React.createElement(Row, { label: "ROI", value: fmt(calc.roi, "percent"), highlight: true })), React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mt-3 mb-1 border-b-2 border-purple-500 pb-1" }, "BRRRR"), React.createElement(Row, { label: "Cash In", value: fmt(calc.cashIn) }), React.createElement(Row, { label: "Refi (75%)", value: fmt(calc.refiAmt) }), React.createElement(Row, { label: "Cash Left", value: fmt(calc.cashLeft), highlight: true }), React.createElement(Row, { label: "CF/mo", value: fmt(calc.brrrCashflow) })), React.createElement("div", { className: "space-y-0.5" }, React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-blue-500 pb-1" }, "Hold / Rental"), React.createElement(Row, { label: "Rent", value: fmt(overrides.monthlyRent) }), React.createElement(Row, { label: "- Mortgage", value: fmt(-calc.monthlyMortgage) }), React.createElement(Row, { label: "- Tax", value: fmt(-calc.monthlyTax) }), React.createElement(Row, { label: "- Ins", value: fmt(-calc.monthlyIns) }), React.createElement(Row, { label: "- Maint", value: fmt(-calc.monthlyMaint) }), React.createElement(Row, { label: "- Vacancy", value: fmt(-calc.monthlyVacancy) }), React.createElement("div", { className: "border-t-2 border-navy pt-1 mt-1" }, React.createElement(Row, { label: "CF/mo", value: fmt(calc.cashflow), highlight: true }), React.createElement(Row, { label: "NOI/yr", value: fmt(calc.annualNOI) }), React.createElement(Row, { label: "Yield", value: fmt(calc.grossYield, "percent") }), React.createElement(Row, { label: "Cap Rate", value: fmt(calc.capRate, "percent") })))), React.createElement("div", { className: "mt-3 bg-slate-50 rounded-lg p-2 text-[10px] lg:text-xs text-slate-500" }, React.createElement("strong", null, "Data:"), " ", fmt(prop.assessedValue), " \u00B7 ", fmt(prop.sqft, "number"), " sqft \u00B7 ", fmt(prop.pricePerSqft), "/sqft \u00B7 Tenure: ", prop.tenure, " yrs \u00B7 Lead: ", prop.leadScore, " \u00B7 ", prop.segment, prop.lotSize ? " \u00B7 Lot: " + prop.lotSize + " ac" : "", prop.zoning ? " \u00B7 Zone: " + prop.zoning : ""))));
+  return React.createElement("div", { className: "detail-modal", onClick: (e) => { if (e.target === e.currentTarget) onClose(); } },
+    React.createElement("div", { className: "bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto my-2 lg:my-6 overflow-hidden" },
+      React.createElement("div", { className: "bg-navy text-white px-3 lg:px-6 py-3 flex items-center justify-between" },
+        React.createElement("div", { className: "min-w-0" },
+          React.createElement("h3", { className: "text-sm lg:text-xl font-bold truncate" }, prop.address),
+          React.createElement("p", { className: "text-[10px] lg:text-sm text-slate-300 truncate" }, prop.village, ", MA ", prop.zip, " \u00B7 ", prop.homeType, " \u00B7 ", prop.owner)),
+        React.createElement("div", { className: "flex gap-2 flex-shrink-0 ml-2" },
+          React.createElement("button", { onClick: () => onToggleStar(prop.id), className: "px-2 lg:px-3 py-1.5 rounded-lg text-[11px] lg:text-sm font-medium transition-all " + (isStarred ? "bg-gold text-white" : "bg-white/10 text-white hover:bg-white/20") }, isStarred ? "\u2605" : "\u2606"),
+          React.createElement("button", { onClick: onClose, className: "px-2 lg:px-3 py-1.5 rounded-lg text-[11px] lg:text-sm bg-white/10 text-white hover:bg-white/20" }, "\u2715"))),
+      React.createElement("div", { className: "px-3 lg:px-6 py-3 lg:py-4" },
+        React.createElement("div", { className: "flex items-center gap-2 mb-3 flex-wrap" },
+          React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold text-white " + stratColor(prop.strategy) }, prop.strategy),
+          React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold " + scoreColor(calc.score) }, "Score: ", calc.score, "/12"),
+          React.createElement("span", { className: "px-2 py-1 rounded-full text-[10px] lg:text-xs font-bold " + gradeColor(prop.leadGrade) }, "Grade ", prop.leadGrade),
+          prop.yearBuilt && React.createElement("span", { className: "text-[10px] text-slate-400" }, "Built ", prop.yearBuilt)),
+        React.createElement("div", { className: "grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6" },
+          React.createElement("div", { className: "space-y-0.5 col-span-2 lg:col-span-1" },
+            React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-gold pb-1" }, "Adjustable Inputs"),
+            ...["Purchase","Reno Budget","ARV","Rent/mo","Rate","Down Pmt","Hold","Buyer Comm","Sell Comm"].map((label, i) => {
+              const refs = [purchaseRef, renoRef, arvRef, rentRef, rateRef, downRef, holdRef, buyCommRef, sellCommRef];
+              const defs = [fmtDef(defaults.purchasePrice), fmtDef(defaults.renoBudget), fmtDef(defaults.arvEstimate), fmtDef(defaults.monthlyRent), defaults.interestRate.toFixed(1), String(defaults.downPayment), String(defaults.holdingMonths), String(defaults.buyComm), String(defaults.sellComm)];
+              const prefixes = ["$","$","$","$",null,null,null,null,null];
+              const suffixes = [null,null,null,null,"%","%","mo","%","%"];
+              return React.createElement("div", { key: label, className: "flex items-center justify-between py-1 border-b border-slate-100" },
+                React.createElement("span", { className: "text-[10px] lg:text-xs text-slate-600" }, label),
+                React.createElement("div", { className: "flex items-center gap-0.5" },
+                  prefixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, prefixes[i]),
+                  React.createElement("input", { type: "text", inputMode: "decimal", defaultValue: defs[i], ref: refs[i],
+                    className: "w-20 lg:w-24 text-right text-[11px] lg:text-sm font-medium px-1.5 py-0.5 border border-slate-200 rounded focus:ring-2 focus:ring-gold/40 focus:outline-none" }),
+                  suffixes[i] && React.createElement("span", { className: "text-[10px] text-slate-400" }, suffixes[i])));
+            }),
+            React.createElement("button", { onClick: handleRecalc,
+              className: "w-full mt-3 py-2.5 rounded-lg font-bold text-white text-sm transition-all " +
+                (btnText === "Updated \u2713" ? "bg-emerald-500" : "bg-gold hover:opacity-90")
+            }, btnText)),
+          React.createElement("div", { className: "space-y-0.5" },
+            React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-emerald-500 pb-1" }, "Flip Analysis"),
+            React.createElement(Row, { label: "Purchase", value: fmt(calc.pp) }),
+            React.createElement(Row, { label: "+ Reno", value: fmt(calc.reno) }),
+            React.createElement(Row, { label: "+ Hold", value: fmt(calc.holdCost) }),
+            React.createElement(Row, { label: "+ Closing", value: fmt(calc.closingCost) }),
+            React.createElement(Row, { label: "+ Buyer Comm", value: fmt(calc.buyerComm) }),
+            React.createElement(Row, { label: "+ Selling", value: fmt(calc.sellingCost) }),
+            React.createElement(Row, { label: "ARV", value: fmt(calc.arv) }),
+            React.createElement("div", { className: "border-t-2 border-navy pt-1 mt-1" },
+              React.createElement(Row, { label: "Profit", value: fmt(calc.netProfit), highlight: true }),
+              React.createElement(Row, { label: "ROI", value: fmt(calc.roi, "percent"), highlight: true })),
+            React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mt-3 mb-1 border-b-2 border-purple-500 pb-1" }, "BRRRR"),
+            React.createElement(Row, { label: "Cash In", value: fmt(calc.cashIn) }),
+            React.createElement(Row, { label: "Refi (75%)", value: fmt(calc.refiAmt) }),
+            React.createElement(Row, { label: "Cash Left", value: fmt(calc.cashLeft), highlight: true }),
+            React.createElement(Row, { label: "CF/mo", value: fmt(calc.brrrCashflow) })),
+          React.createElement("div", { className: "space-y-0.5" },
+            React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-blue-500 pb-1" }, "Hold / Rental"),
+            React.createElement(Row, { label: "Rent", value: fmt(calc.rent) }),
+            React.createElement(Row, { label: "- Mortgage", value: fmt(-calc.monthlyMortgage) }),
+            React.createElement(Row, { label: "- Tax", value: fmt(-calc.monthlyTax) }),
+            React.createElement(Row, { label: "- Ins", value: fmt(-calc.monthlyIns) }),
+            React.createElement(Row, { label: "- Maint", value: fmt(-calc.monthlyMaint) }),
+            React.createElement(Row, { label: "- Vacancy", value: fmt(-calc.monthlyVacancy) }),
+            React.createElement("div", { className: "border-t-2 border-navy pt-1 mt-1" },
+              React.createElement(Row, { label: "CF/mo", value: fmt(calc.cashflow), highlight: true }),
+              React.createElement(Row, { label: "NOI/yr", value: fmt(calc.annualNOI) }),
+              React.createElement(Row, { label: "Yield", value: fmt(calc.grossYield, "percent") }),
+              React.createElement(Row, { label: "Cap Rate", value: fmt(calc.capRate, "percent") })))),
+        React.createElement("div", { className: "mt-3 bg-slate-50 rounded-lg p-2 text-[10px] lg:text-xs text-slate-500" },
+          React.createElement("strong", null, "Data:"), " ", fmt(prop.assessedValue), " \u00B7 ", fmt(prop.sqft, "number"), " sqft \u00B7 ", fmt(prop.pricePerSqft), "/sqft \u00B7 Tenure: ", prop.tenure, " yrs \u00B7 Lead: ", prop.leadScore, " \u00B7 ", prop.segment, prop.lotSize ? " \u00B7 Lot: " + prop.lotSize + " ac" : "", prop.zoning ? " \u00B7 Zone: " + prop.zoning : ""))));
 };
 const CompareView = ({ properties, market, onClose }) => {
   if (properties.length === 0) return null;
