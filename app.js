@@ -105,8 +105,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
   const rateRef = useRef(null);
   const downRef = useRef(null);
   const holdRef = useRef(null);
-  const buyCommRef = useRef(null);
-  const sellCommRef = useRef(null);
+  const commRef = useRef(null);
   const [btnText, setBtnText] = useState("Recalculate Analysis");
 
   const defaults = {
@@ -117,8 +116,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     interestRate: market.mortgageRate * 100,
     downPayment: market.downPaymentPct * 100,
     holdingMonths: prop.strategy === "Flip" ? market.holdingMonths_flip : 12,
-    buyComm: 4,
-    sellComm: 5
+    comm: 4
   };
 
   const runCalc = (vals) => {
@@ -129,13 +127,12 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     const rate = vals.interestRate / 100;
     const dp = vals.downPayment / 100;
     const months = vals.holdingMonths;
-    const buyCommPct = vals.buyComm;
-    const sellCommPct = vals.sellComm;
+    const commPct = vals.comm / 100;
+    const purchaseComm = pp * commPct;
     const holdCost = pp * (rate * months / 12);
-    const buyerComm = pp * (buyCommPct / 100);
     const closingCost = pp * market.closingCostPct;
-    const sellingCost = arv * (sellCommPct / 100);
-    const totalCost = reno + holdCost + closingCost + sellingCost + buyerComm;
+    const sellingCost = arv * 0.05;
+    const totalCost = reno + holdCost + closingCost + sellingCost + purchaseComm;
     const netProfit = arv - pp - totalCost;
     const roi = pp + reno > 0 ? netProfit / (pp + reno) * 100 : 0;
     const loanAmt = pp * (1 - dp);
@@ -151,7 +148,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
     const capRate = pp > 0 ? annualNOI / pp * 100 : 0;
     const grossYield = pp > 0 ? annualRent / pp * 100 : 0;
     const refiAmt = arv * market.refiLTV;
-    const cashIn = pp + reno;
+    const cashIn = pp + reno + purchaseComm;
     const cashLeft = cashIn - refiAmt;
     const refiMortgage = calcMortgage(refiAmt, rate);
     const brrrCashflow = rent - (refiMortgage + monthlyTax + monthlyIns + monthlyMaint + monthlyVacancy);
@@ -164,14 +161,14 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
       if (prop.leadScore >= 11 && prop.leadGrade === "A") s += 3; else if (prop.leadScore >= 9 || prop.leadGrade === "A") s += 2; else if (prop.leadScore >= 7 || prop.leadGrade === "B") s += 1;
       return s;
     })();
-    return { pp, reno, arv, rent, netProfit, roi, holdCost, closingCost, sellingCost, buyerComm, totalCost, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
+    return { pp, reno, arv, rent, netProfit, roi, holdCost, closingCost, sellingCost, purchaseComm, cashflow, monthlyMortgage, monthlyTax, monthlyIns, monthlyMaint, monthlyVacancy, totalExpense, capRate, grossYield, annualRent, annualNOI, refiAmt, cashIn, cashLeft, refiMortgage, brrrCashflow, score };
   };
 
   const [calc, setCalc] = useState(() => runCalc(defaults));
 
   const parseVal = (ref) => {
     const raw = ref.current ? ref.current.value : "0";
-    return parseFloat(raw.replace(/[$,%]/g, "").replace(/,/g, "")) || 0;
+    return parseFloat(raw.replace(/[^0-9.]/g, "")) || 0;
   };
 
   const handleRecalc = () => {
@@ -184,8 +181,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
       interestRate: parseVal(rateRef),
       downPayment: parseVal(downRef),
       holdingMonths: parseVal(holdRef),
-      buyComm: parseVal(buyCommRef),
-      sellComm: parseVal(sellCommRef),
+      comm: parseVal(commRef),
     };
     const result = runCalc(vals);
     setCalc(result);
@@ -198,7 +194,7 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
   const fmtDef = (n) => Math.round(n).toLocaleString();
   const Row = ({ label, value, highlight }) => React.createElement("div", { className: "flex justify-between py-0.5 text-[11px] lg:text-sm " + (highlight ? "font-bold text-navy" : "text-slate-600") }, React.createElement("span", null, label), React.createElement("span", { className: highlight ? "text-sm lg:text-lg" : "" }, value));
   return React.createElement("div", { className: "detail-modal", onClick: (e) => { if (e.target === e.currentTarget) onClose(); } },
-    React.createElement("div", { className: "bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto my-2 lg:my-6 overflow-hidden" },
+    React.createElement("div", { className: "bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto my-2 lg:my-6 overflow-hidden", key: prop.id },
       React.createElement("div", { className: "bg-navy text-white px-3 lg:px-6 py-3 flex items-center justify-between" },
         React.createElement("div", { className: "min-w-0" },
           React.createElement("h3", { className: "text-sm lg:text-xl font-bold truncate" }, prop.address),
@@ -215,11 +211,11 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
         React.createElement("div", { className: "grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6" },
           React.createElement("div", { className: "space-y-0.5 col-span-2 lg:col-span-1" },
             React.createElement("h4", { className: "font-bold text-[11px] lg:text-sm text-navy mb-1 border-b-2 border-gold pb-1" }, "Adjustable Inputs"),
-            ...["Purchase","Reno Budget","ARV","Rent/mo","Rate","Down Pmt","Hold","Buyer Comm","Sell Comm"].map((label, i) => {
-              const refs = [purchaseRef, renoRef, arvRef, rentRef, rateRef, downRef, holdRef, buyCommRef, sellCommRef];
-              const defs = [fmtDef(defaults.purchasePrice), fmtDef(defaults.renoBudget), fmtDef(defaults.arvEstimate), fmtDef(defaults.monthlyRent), defaults.interestRate.toFixed(1), String(defaults.downPayment), String(defaults.holdingMonths), String(defaults.buyComm), String(defaults.sellComm)];
-              const prefixes = ["$","$","$","$",null,null,null,null,null];
-              const suffixes = [null,null,null,null,"%","%","mo","%","%"];
+            ...["Purchase","Reno Budget","ARV","Rent/mo","Rate","Down Pmt","Hold","Purch Comm"].map((label, i) => {
+              const refs = [purchaseRef, renoRef, arvRef, rentRef, rateRef, downRef, holdRef, commRef];
+              const defs = [fmtDef(defaults.purchasePrice), fmtDef(defaults.renoBudget), fmtDef(defaults.arvEstimate), fmtDef(defaults.monthlyRent), defaults.interestRate.toFixed(1), String(defaults.downPayment), String(defaults.holdingMonths), defaults.comm.toFixed(1)];
+              const prefixes = ["$","$","$","$",null,null,null,null];
+              const suffixes = [null,null,null,null,"%","%","mo","%"];
               return React.createElement("div", { key: label, className: "flex items-center justify-between py-1 border-b border-slate-100" },
                 React.createElement("span", { className: "text-[10px] lg:text-xs text-slate-600" }, label),
                 React.createElement("div", { className: "flex items-center gap-0.5" },
@@ -238,8 +234,8 @@ const PropertyDetail = ({ prop, market, onClose, onToggleStar, isStarred }) => {
             React.createElement(Row, { label: "+ Reno", value: fmt(calc.reno) }),
             React.createElement(Row, { label: "+ Hold", value: fmt(calc.holdCost) }),
             React.createElement(Row, { label: "+ Closing", value: fmt(calc.closingCost) }),
-            React.createElement(Row, { label: "+ Buyer Comm", value: fmt(calc.buyerComm) }),
-            React.createElement(Row, { label: "+ Selling", value: fmt(calc.sellingCost) }),
+            React.createElement(Row, { label: "+ Purch Comm", value: fmt(calc.purchaseComm) }),
+            React.createElement(Row, { label: "+ Selling (5%)", value: fmt(calc.sellingCost) }),
             React.createElement(Row, { label: "ARV", value: fmt(calc.arv) }),
             React.createElement("div", { className: "border-t-2 border-navy pt-1 mt-1" },
               React.createElement(Row, { label: "Profit", value: fmt(calc.netProfit), highlight: true }),
